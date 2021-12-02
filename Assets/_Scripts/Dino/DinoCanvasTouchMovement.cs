@@ -43,45 +43,11 @@ public class DinoCanvasTouchMovement : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public void UpdateDino()
     {
-        /*
-        switch (animationState)
-        {
-            case AnimationState.IDLE:
-                anim.Play("dino_idle");
-                Debug.Log("IDLE");
-                break;
-
-            case AnimationState.RUN:
-                anim.Play("dino_run");
-                Debug.Log("RUN");
-                break;
-
-            case AnimationState.JUMP:
-                anim.Play("dino_jump");
-                Debug.Log("JUMP");
-                break;
-
-            case AnimationState.CROUCH:
-                anim.Play("dino_crouch");
-                Debug.Log("CROUCH");
-                break;
-
-            case AnimationState.DEATH:
-                anim.Play("dino_death");
-                Debug.Log("DEAD");
-                break;
-        }
-        */
         if (GameManager.instance.dinoIsRunning)
         {
-            if (controller.isDead)
-            {
-                //animationState = AnimationState.DEATH;
-                anim.Play("greenDino_death");
-            }
-            else
+            if (!controller.isDead)
             {
                 if (controller.isLanding)
                 {
@@ -91,7 +57,7 @@ public class DinoCanvasTouchMovement : MonoBehaviour
                     if (isWaitingToCrouch)
                     {
                         crouch = true;
-                        //animationState = AnimationState.CROUCH;
+                        controller.NormalizeGravity();
                         anim.Play("greenDino_crouch");
 
 
@@ -99,24 +65,27 @@ public class DinoCanvasTouchMovement : MonoBehaviour
                     }
                     else
                     {
-                        //animationState = AnimationState.RUN;
                         anim.Play("greenDino_run");
                     }
                 }
             }
+            else
+            {
+                anim.Play("greenDino_death");
+            }
         }
         else
         {
-            //animationState = AnimationState.IDLE;
             anim.Play("greenDino_idle");
         }
-
-
     }
+    
     private void FixedUpdate()
     {
+        controller.GroundCheck();
         controller.Move(ref jump, ref crouch);
     }
+    
 
     public void CrouchButtonPressedDown()
     {
@@ -131,6 +100,7 @@ public class DinoCanvasTouchMovement : MonoBehaviour
             }
             else
             {
+                controller.SmashDown();
                 isWaitingToCrouch = true;
             }
         }
@@ -148,6 +118,7 @@ public class DinoCanvasTouchMovement : MonoBehaviour
             }
             else
             {
+                controller.NormalizeGravity();
                 isWaitingToCrouch = false;
             }
         }

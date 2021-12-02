@@ -33,6 +33,7 @@ public class UI_Manager : MonoBehaviour
     public void HandleStartButton()
     {
         //GameManager.instance.StartGame();
-        GameManager.instance.UpdateGameState(GameState.GAME);
+        Debug.Log("GAME START");
+        GameManager.instance.MainTransition();
     }
 }

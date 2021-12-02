@@ -7,8 +7,6 @@ public class RandomGroundGenerator : MonoBehaviour
 {
     private Vector3 spawnPoint;
     private Vector3 endPoint;
-    private Vector3 accurateGroundSpawnPointPosition;
-
 
     private GameObject tmp;
     private GameObject tmpGroundToDeactivate;
@@ -19,27 +17,7 @@ public class RandomGroundGenerator : MonoBehaviour
 
     // dovra essere sostituita con una variabile speed globale che si incrementa con il passare del tempo
     [SerializeField] float speed = 4;
-    /*
-    private void Awake()
-    {
-        GameManager.OnGameStateChanged += GameManagerOnOnGameStartChanged;
-    }
-    private void OnDestroy()
-    {
-        GameManager.OnGameStateChanged -= GameManagerOnOnGameStartChanged;
-    }
-    private void GameManagerOnOnGameStartChanged(GameState state)
-    {
-        if(state == GameState.GAME || state == GameState.TUTORIAL)
-        {
-            StartCoroutine(FinishInitializingGround());
-        }
-    }
-    */
-    public void StartGroundAnimation(Action callback)
-    {
-        StartCoroutine(FinishInitializingGround(callback));
-    }
+
     void Start()
     {
         spawnPoint = GameManager.instance.GetSpawnPoint();
@@ -48,11 +26,13 @@ public class RandomGroundGenerator : MonoBehaviour
         InitializeGround();
     }
 
-    private void InitializeGround()
+    #region INITIALIZE GROUND
+    // INIZIALIZZA LA TERRA INSTANZIANDONE I PRIMI 3 MODULI
+    private void InitializeGround() 
     {
         //for (int i = 0; i < initialGroundsNumber; i++)
         for (int i = 0; i < 3; i++)
-            {
+        {
             tmp = ObjectPool.instance.GetRandomGround();
 
             if (tmp)
@@ -63,12 +43,18 @@ public class RandomGroundGenerator : MonoBehaviour
             }
         }
     }
+
+    // FINISCE DI INSTANZIARE I MODULI DI TERRA RIMANENTE, UNO AD UNO
+    public void StartGroundAnimation(Action callback)
+    {
+        StartCoroutine(FinishInitializingGround(callback));
+    }
     IEnumerator FinishInitializingGround(Action callback)
     {
         yield return new WaitForSeconds(0.5f);
 
         int index = 3;
-        while(index < initialGroundsNumber)
+        while (index < initialGroundsNumber)
         {
 
             tmp = ObjectPool.instance.GetRandomGround();
@@ -86,63 +72,46 @@ public class RandomGroundGenerator : MonoBehaviour
         GameManager.instance.StartGround();
 
         callback();
-
     }
-    private void Update()
+    #endregion
+
+    public void UpdateGround()
     {
-        if (GameManager.instance.groundIsRunning)
+        // per ogni figlio di 'Ground'
+        for (int i = 0; i < transform.childCount; i++)
         {
-            // per ogni figlio di 'Ground'
-            for (int i = 0; i < transform.childCount; i++)
+            tmp = transform.GetChild(i).gameObject;
+            // se il figlio è attivo
+            if (tmp.activeInHierarchy)
             {
-                tmp = transform.GetChild(i).gameObject;
-                // se il figlio è attivo
-                if (tmp.activeInHierarchy)
+                // e se non è ancora arrivato all' 'endPoint'
+                if (tmp.transform.position.x > endPoint.x)
                 {
-                    // e se non è ancora arrivato all' 'endPoint'
-                    if (tmp.transform.position.x > endPoint.x)
-                    {
-                        // sposta il figlio
-                        tmp.transform.Translate(Vector3.left * speed * Time.deltaTime);
-                    }
-                    else
-                    {
-                        // altrimenti il figlio è arrivato all' 'endPoint'
-                        // quindi salvo il figlio in una variabile temporanea 'tmpGroudToDeactivate'
-                        // e attivo 'isTimeToWorkWithList' che servirà una volta finito il ciclo
-                        tmpGroundToDeactivate = tmp;
-                        isTimeToWorkWithList = true;
-                    }
+                    // sposta il figlio
+                    tmp.transform.Translate(Vector3.left * speed * Time.deltaTime);
+                }
+                else
+                {
+                    // altrimenti il figlio è arrivato all' 'endPoint'
+                    // quindi salvo il figlio in una variabile temporanea 'tmpGroudToDeactivate'
+                    // e attivo 'isTimeToWorkWithList' che servirà una volta finito il ciclo
+                    tmpGroundToDeactivate = tmp;
+                    isTimeToWorkWithList = true;
                 }
             }
-
-            //se ' isTimetoWorkWithList' è attivo
-            if (isTimeToWorkWithList)
-            {
-                // RESETTO l'oggetto che è arrivato all' 'endPoint'
-                // aggiungo 'tmpGroundToDeactivate' alla lista delle 'instanze-inattive' 
-                ObjectPool.instance.AddObjectToGroundInstanceList(tmpGroundToDeactivate);
-                // rimuovo 'tmpGroundToDeactivate' dalla lista delle 'instanze-attive'
-                ObjectPool.instance.RemoveObjectFromGroundInSceneInstanceList(tmpGroundToDeactivate);
-                // disattivo 'tmpGroundToDeactivate'
-                tmpGroundToDeactivate.SetActive(false);
-
-                // salvo in 'accurateSpawnPointPosition' la posizione dell'ultimo oggetto della lista
-                // delle 'instanze-attive' correggendolo di + 1 sull'asse delle 'x'
-                // NOTA[DEVO SALVARE QUESTA VARIABILE PRIMA DI INSTANZIARE UN NUOVO OGGETTO]
-                accurateGroundSpawnPointPosition = ObjectPool.instance.GetAccurateGroundSpawnPointPosition();
-
-                // INSTANZIO un nuovo oggetto casuale
-                tmp = ObjectPool.instance.GetRandomGround();
-                // lo posiziono nella posizione salvata in precedenza in 'accurateGroundSpawnPointPosition'
-                tmp.transform.position = accurateGroundSpawnPointPosition;
-                // e lo attivo
-                tmp.SetActive(true);
-
-                // disattivo 'isTimeToWorkWithList'
-                isTimeToWorkWithList = false;
-            }
         }
-        
+
+        //se ' isTimetoWorkWithList' è attivo
+        if (isTimeToWorkWithList)
+        {
+            // RESETTO l'oggetto che è arrivato all' 'endPoint'
+            ObjectPool.instance.DeactivateGround(tmpGroundToDeactivate);
+
+            // INSTANZIO un nuovo oggetto casuale
+            ObjectPool.instance.ActivateNewGround(ref tmp);
+
+            // disattivo 'isTimeToWorkWithList'
+            isTimeToWorkWithList = false;
+        }
     }
 }

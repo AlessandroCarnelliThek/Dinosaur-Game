@@ -22,6 +22,10 @@ public class DinoController : MonoBehaviour
     [SerializeField] float jumpForce = 300;
     public bool isDead = false;
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(groundCheck.position, groundedRradius);
+    }
 
     private void Awake()
     {
@@ -29,7 +33,7 @@ public class DinoController : MonoBehaviour
     }
 
 
-    private void FixedUpdate()
+    public void GroundCheck()
     {
         wasgrounded = grounded;
         grounded = false;
@@ -44,10 +48,7 @@ public class DinoController : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawWireSphere(groundCheck.position, groundedRradius);
-    }
+
     public void Move(ref bool jump, ref bool crouch)
     {
 
@@ -68,5 +69,13 @@ public class DinoController : MonoBehaviour
             jump = false;
         }
 
+    }
+    public void SmashDown()
+    {
+        rb2D.gravityScale = 20;
+    }
+    public void NormalizeGravity()
+    {
+        rb2D.gravityScale = 3;
     }
 }

@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
 
     public bool groundIsRunning = false;
     public bool dinoIsRunning = false;
+    public bool isFirstPlay = true;
 
     public Action callback;
 
@@ -23,17 +24,23 @@ public class GameManager : MonoBehaviour
     {
         dinoIsRunning = true;
     }
+    private void StartGame()
+    {
+        UpdateGameState(!isFirstPlay ? GameState.GAME : GameState.TUTORIAL);
+    }
 
     [SerializeField] Transform spawnPoint;
     [SerializeField] Transform endPoint;
 
-    [SerializeField] GameObject Dino, Ground;
+    [SerializeField] DinoCanvasTouchMovement Dino;
+    [SerializeField] RandomGroundGenerator Ground;
     public Vector3 GetSpawnPoint() { return spawnPoint.position; }
     public Vector3 GetEndPoint() { return endPoint.position; }
 
     public GameState State;
 
     public static event Action<GameState> OnGameStateChanged;
+
     private void Awake()
     {
         if (instance)
@@ -44,10 +51,11 @@ public class GameManager : MonoBehaviour
         instance = this;
 
         //-----------------------------
-        //score = 0;
-        //hiScore = 0;
-        //-----------------------------
-    }
+
+    //score = 0;
+    //hiScore = 0;
+    //-----------------------------
+}
     private void Start()
     {
         UpdateGameState(GameState.MAIN);
@@ -78,9 +86,13 @@ public class GameManager : MonoBehaviour
         OnGameStateChanged?.Invoke(newState);
     }
 
+   
 
-
-
+    public void Update()
+    {
+        Dino.UpdateDino();
+        if (groundIsRunning) { Ground.UpdateGround(); }
+    }
 
 
 
@@ -88,21 +100,32 @@ public class GameManager : MonoBehaviour
     {
 
     }
+    public void MainTransition()
+    {
+        Debug.Log("GAME START");
+        Dino.StartDinoIntroAnimation();
+        Ground.StartGroundAnimation(() => StartGame());
+    }
     public void HandleTutorial()
     {
+        //joystick animation:
 
+        //#_JUMP PULSE
+        //viene spawnato un cactus per il salto
+
+        //#_CROUCH PULSE
+        //viene spawnato uno ptero per l'accovacciamento
+
+        //start game
+        //UpdateGameState(GameState.GAME);
     }
     public void HandleGame()
     {
-        Dino.GetComponent<DinoCanvasTouchMovement>().StartDinoIntroAnimation();
-        Ground.GetComponent<RandomGroundGenerator>().StartGroundAnimation(()=>
-        {
-            
-        });
+
     }
     public void HandlePause()
     {
-
+        Time.timeScale = (Time.timeScale != 0) ? 0 : 1;
     }
     public void HandleGameOver()
     {
