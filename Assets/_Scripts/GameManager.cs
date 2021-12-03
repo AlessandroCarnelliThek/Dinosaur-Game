@@ -6,42 +6,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
-
-    //private int score;
-    //private int hiScore;
-
-    public bool groundIsRunning = false;
-    public bool dinoIsRunning = false;
-    public bool isFirstPlay = true;
-
-    public Action callback;
-
-    public void StartGround()
-    {
-        groundIsRunning = true;
-    }
-    public void StartDino()
-    {
-        dinoIsRunning = true;
-    }
-    private void StartGame()
-    {
-        UpdateGameState(!isFirstPlay ? GameState.GAME : GameState.TUTORIAL);
-    }
-
-    [SerializeField] Transform spawnPoint;
-    [SerializeField] Transform endPoint;
-
-    [SerializeField] DinoCanvasTouchMovement Dino;
-    [SerializeField] RandomGroundGenerator Ground;
-    public Vector3 GetSpawnPoint() { return spawnPoint.position; }
-    public Vector3 GetEndPoint() { return endPoint.position; }
-
-    public GameState State;
-
-    public static event Action<GameState> OnGameStateChanged;
-
-    private void Awake()
+    private void MakeSingleton()
     {
         if (instance)
         {
@@ -49,13 +14,60 @@ public class GameManager : MonoBehaviour
             return;
         }
         instance = this;
+    }
+
+    public GameState State;
+    public static event Action<GameState> OnGameStateChanged;
+
+    #region POINT OF INTEREST
+    [SerializeField] Transform terrainSpawnPoint;
+    [SerializeField] Transform endPoint;
+    public Vector3 GetTerrainSpawnPoint() { return terrainSpawnPoint.position; }
+    public Vector3 GetEndPoint() { return endPoint.position; }
+    #endregion
+
+    #region GAME BOOLEANS
+
+    public bool isFirstPlay = true; // if hi score == 0;
+    public bool terrainIsRunning = false;
+    public bool dinoIsRunning = false;
+
+    public void StartGround()
+    {
+        terrainIsRunning = true;
+    }
+    public void StartDino()
+    {
+        dinoIsRunning = true;
+    }
+    private void StartGame()
+    {
+        //UpdateGameState(!isFirstPlay ? GameState.GAME : GameState.TUTORIAL);
+        UpdateGameState(GameState.GAME);
+    }
+    #endregion
+
+    #region ENVIRONMENT
+    //private int score;
+    //private int hiScore;
+    [SerializeField] DinoCanvasTouchMovement Dino;
+    [SerializeField] RandomTerrainGenerator Terrain;
+    #endregion
+
+    public Action callback;
+
+
+    private void Awake()
+    {
+        // singleton
+        MakeSingleton();
 
         //-----------------------------
 
-    //score = 0;
-    //hiScore = 0;
-    //-----------------------------
-}
+        //score = 0;
+        //hiScore = 0;
+        //-----------------------------
+    }
     private void Start()
     {
         UpdateGameState(GameState.MAIN);
@@ -91,10 +103,8 @@ public class GameManager : MonoBehaviour
     public void Update()
     {
         Dino.UpdateDino();
-        if (groundIsRunning) { Ground.UpdateGround(); }
+        if (terrainIsRunning) { Terrain.UpdateTerrain(); }
     }
-
-
 
     public void HandleMain()
     {
@@ -104,7 +114,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GAME START");
         Dino.StartDinoIntroAnimation();
-        Ground.StartGroundAnimation(() => StartGame());
+        Terrain.StartTerrainAnimation(() => StartGame());
     }
     public void HandleTutorial()
     {
@@ -125,7 +135,7 @@ public class GameManager : MonoBehaviour
     }
     public void HandlePause()
     {
-        Time.timeScale = (Time.timeScale != 0) ? 0 : 1;
+//        Time.timeScale = (Time.timeScale != 0) ? 0 : 1;
     }
     public void HandleGameOver()
     {

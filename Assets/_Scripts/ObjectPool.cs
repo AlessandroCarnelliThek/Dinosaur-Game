@@ -15,16 +15,16 @@ public class ObjectPool : MonoBehaviour
         instance = this;
     }
 
-    #region GROUND
-    [SerializeField] GameObject[] GroundPrefabs;
-    public List<GameObject> GroundInstanceList;
-    public List<GameObject> GroundInSceneInstanceList;
+    #region TERRAIN
+    [SerializeField] GameObject[] TerrainPrefabs;
+    public List<GameObject> TerrainInstanceList;
+    public List<GameObject> ActiveTerrainInstanceList;
 
-    private int groundsToCreate;
+    private int terrainModulesToCreate;
 
-    private int randomGroundIndex;
-    private int tmpGroundToDeactivateIndex;
-    private Vector3 accurateGroundSpawnPointPosition;
+    private int randomTerrainModuleIndex;
+    private int tmpTerrainModuleToDeactivateIndex;
+    private Vector3 accurateTerrainSpawnPointPosition;
     #endregion
 
     #region CACTUS
@@ -55,21 +55,21 @@ public class ObjectPool : MonoBehaviour
         MakeSingleton();
 
         // inizializzazione numero di oggetti da creare
-        groundsToCreate = GroundPrefabs.Length * 2;
+        terrainModulesToCreate = TerrainPrefabs.Length * 2;
         cactusToCreate = CactusPrefabs.Length * 2;
         
         // inizializzazione liste:
-        GroundInstanceList = new List<GameObject>();
-        GroundInSceneInstanceList = new List<GameObject>();
+        TerrainInstanceList = new List<GameObject>();
+        ActiveTerrainInstanceList = new List<GameObject>();
 
         // instanziamento oggetti:
         GameObject tmp;
         int index = 0;
 
-        // Ground
-        for (int i = 0; i < groundsToCreate; i++)
+        // Terrain
+        for (int i = 0; i < terrainModulesToCreate; i++)
         {
-            InstantiateGround(out tmp, ref index);
+            InstantiateTerrainModule(out tmp, ref index);
         }
 
         // Cactus
@@ -85,13 +85,13 @@ public class ObjectPool : MonoBehaviour
     }
 
 
-    #region GROUND METHOD
-    private void InstantiateGround(out GameObject tmp, ref int index)
+    #region TERRAIN METHOD
+    private void InstantiateTerrainModule(out GameObject tmp, ref int index)
     {
         // Creazione
-        tmp = Instantiate(GroundPrefabs[index]);
+        tmp = Instantiate(TerrainPrefabs[index]);
         // Assegnazione al parent 'Ground'
-        tmp.transform.parent = GameObject.Find("RandomGroundGenerator").transform;
+        tmp.transform.parent = GameObject.Find("RandomTerrainGenerator").transform;
         // Inizializzazione
         //----------------------------------
 
@@ -100,69 +100,67 @@ public class ObjectPool : MonoBehaviour
         // Disattivazione
         tmp.SetActive(false);
         // Inserimento nella lista
-        GroundInstanceList.Add(tmp);
+        TerrainInstanceList.Add(tmp);
 
 
         index++;
-        if (index == GroundPrefabs.Length)
+        if (index == TerrainPrefabs.Length)
         {
             index = 0;
         }
     }
 
-    public GameObject GetRandomGround()
+    public GameObject GetRandomTerrainModule()
     {
         // genero un index casuale 'randomIndex'
-        randomGroundIndex = (int)Mathf.Round(Random.Range(0, (GroundInstanceList.Count)));
+        randomTerrainModuleIndex = (int)Mathf.Round(Random.Range(0, (TerrainInstanceList.Count)));
 
         // aggiungo l'oggetto con index 'randomIndex' di GroundInstamceList
         // alla lista GroundInSceneInstanceList
-        GroundInSceneInstanceList.Add(GroundInstanceList[randomGroundIndex]);
+        ActiveTerrainInstanceList.Add(TerrainInstanceList[randomTerrainModuleIndex]);
 
         // rimuovo l'oggetto appena copiato da GroundInstanceList
-        GroundInstanceList.RemoveAt(randomGroundIndex);
+        TerrainInstanceList.RemoveAt(randomTerrainModuleIndex);
 
-        return GroundInSceneInstanceList[GroundInSceneInstanceList.Count - 1];
+        return ActiveTerrainInstanceList[ActiveTerrainInstanceList.Count - 1];
     }
-    public Vector3 GetAccurateGroundSpawnPointPosition()
+    public Vector3 GetAccurateTerrainSpawnPointPosition()
     {
-        return new Vector3(GroundInSceneInstanceList[GroundInSceneInstanceList.Count - 1].transform.position.x + 1, 0, 0);
+        return new Vector3(ActiveTerrainInstanceList[ActiveTerrainInstanceList.Count - 1].transform.position.x + 1, 0, 0);
     }
 
-    public void DeactivateGround(GameObject tmpGroundToDeactivate)
+    public void DeactivateTerrainModule(GameObject tmpTerrainModuleToDeactivate)
     {
         // aggiungo 'tmpGroundToDeactivate' alla lista delle 'instanze-inattive' 
-        GroundInstanceList.Add(tmpGroundToDeactivate);
+        TerrainInstanceList.Add(tmpTerrainModuleToDeactivate);
 
         // rimuovo 'tmpGroundToDeactivate' dalla lista delle 'instanze-attive'
         // so che per forza di cose l'index sarà 0, quindi posso evitare di cercare ogni volta l'index associato al
         // oggetto 'tmpGroundToDeactivate'
-        tmpGroundToDeactivateIndex = 0;
+        tmpTerrainModuleToDeactivateIndex = 0;
         //tmpGroundToDeactivateIndex = GroundInSceneInstanceList.Find(x => x.name.Contains(tmp.name));
         //tmpGroundToDeactivateIndex = GroundInSceneInstanceList.FindIndex(x => x.name.Contains(tmpGroundToDeactivate.name));
-        GroundInSceneInstanceList.RemoveAt(tmpGroundToDeactivateIndex);
+        ActiveTerrainInstanceList.RemoveAt(tmpTerrainModuleToDeactivateIndex);
         // disattivo 'tmpGroundToDeactivate'
-        tmpGroundToDeactivate.SetActive(false);
+        tmpTerrainModuleToDeactivate.SetActive(false);
     }
-    public void ActivateNewGround(ref GameObject tmp)
+    public void ActivateNewRandomTerrainModule(ref GameObject tmpCurrentTerrainModule)
     {
         // salvo in 'accurateSpawnPointPosition' la posizione dell'ultimo oggetto della lista
         // delle 'instanze-attive' correggendolo di + 1 sull'asse delle 'x'
         // NOTA[DEVO SALVARE QUESTA VARIABILE PRIMA DI INSTANZIARE UN NUOVO OGGETTO]
-        accurateGroundSpawnPointPosition = GetAccurateGroundSpawnPointPosition();
+        accurateTerrainSpawnPointPosition = GetAccurateTerrainSpawnPointPosition();
 
         // INSTANZIO un nuovo oggetto casuale
-        tmp = GetRandomGround();
+        tmpCurrentTerrainModule = GetRandomTerrainModule();
         // lo posiziono nella posizione salvata in precedenza in 'accurateGroundSpawnPointPosition'
-        tmp.transform.position = accurateGroundSpawnPointPosition;
+        tmpCurrentTerrainModule.transform.position = accurateTerrainSpawnPointPosition;
         // e lo attivo
-        tmp.SetActive(true);
+        tmpCurrentTerrainModule.SetActive(true);
     }
-
-
     #endregion
 
-
+    #region CACTUS METHOD
     private void InstantiateCactus(out GameObject tmp, ref int index)
     {
         // Creazione
@@ -194,11 +192,20 @@ public class ObjectPool : MonoBehaviour
 
         while (!cactusFound)
         {
-            randomGroundIndex = (int)Mathf.Round(Random.Range(0, (CactusInstanceList.Count)));
-            if (CactusInstanceList[randomGroundIndex].activeInHierarchy) { continue; }
+            randomTerrainModuleIndex = (int)Mathf.Round(Random.Range(0, (CactusInstanceList.Count)));
+            if (CactusInstanceList[randomTerrainModuleIndex].activeInHierarchy) { continue; }
             cactusFound = true;
         }
-        return CactusInstanceList[randomGroundIndex];
+        return CactusInstanceList[randomTerrainModuleIndex];
     }
+    #endregion
+
+    #region ENEMIES METHOD
+    
+    #endregion
+
+    #region CLOUDS METHOD
+    
+    #endregion
 }
 

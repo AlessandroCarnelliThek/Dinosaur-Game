@@ -3,67 +3,67 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RandomGroundGenerator : MonoBehaviour
+public class RandomTerrainGenerator : MonoBehaviour
 {
-    private Vector3 spawnPoint;
+    private Vector3 terrainSpawnPoint;
     private Vector3 endPoint;
 
-    private GameObject tmp;
-    private GameObject tmpGroundToDeactivate;
+    private GameObject tmpCurrentTerrainModule;
+    private GameObject tmpTerrainModuleToDeactivate;
 
     private bool isTimeToWorkWithList = false;
 
-    private int initialGroundsNumber = 14;
+    private int initialTerrainModulesNumber = 14;
 
     // dovra essere sostituita con una variabile speed globale che si incrementa con il passare del tempo
     [SerializeField] float speed = 4;
 
     void Start()
     {
-        spawnPoint = GameManager.instance.GetSpawnPoint();
+        terrainSpawnPoint = GameManager.instance.GetTerrainSpawnPoint();
         endPoint = GameManager.instance.GetEndPoint();
 
-        InitializeGround();
+        InitializeTerrain();
     }
 
     #region INITIALIZE GROUND
     // INIZIALIZZA LA TERRA INSTANZIANDONE I PRIMI 3 MODULI
-    private void InitializeGround() 
+    private void InitializeTerrain() 
     {
         //for (int i = 0; i < initialGroundsNumber; i++)
         for (int i = 0; i < 3; i++)
         {
-            tmp = ObjectPool.instance.GetRandomGround();
+            tmpCurrentTerrainModule = ObjectPool.instance.GetRandomTerrainModule();
 
-            if (tmp)
+            if (tmpCurrentTerrainModule)
             {
-                tmp.transform.position = spawnPoint;
-                tmp.SetActive(true);
-                spawnPoint += Vector3.right;
+                tmpCurrentTerrainModule.transform.position = terrainSpawnPoint;
+                tmpCurrentTerrainModule.SetActive(true);
+                terrainSpawnPoint += Vector3.right;
             }
         }
     }
 
     // FINISCE DI INSTANZIARE I MODULI DI TERRA RIMANENTE, UNO AD UNO
-    public void StartGroundAnimation(Action callback)
+    public void StartTerrainAnimation(Action callback)
     {
-        StartCoroutine(FinishInitializingGround(callback));
+        StartCoroutine(FinishInitializeTerrain(callback));
     }
-    IEnumerator FinishInitializingGround(Action callback)
+    IEnumerator FinishInitializeTerrain(Action callback)
     {
         yield return new WaitForSeconds(0.5f);
 
         int index = 3;
-        while (index < initialGroundsNumber)
+        while (index < initialTerrainModulesNumber)
         {
 
-            tmp = ObjectPool.instance.GetRandomGround();
+            tmpCurrentTerrainModule = ObjectPool.instance.GetRandomTerrainModule();
 
-            if (tmp)
+            if (tmpCurrentTerrainModule)
             {
-                tmp.transform.position = spawnPoint;
-                tmp.SetActive(true);
-                spawnPoint += Vector3.right;
+                tmpCurrentTerrainModule.transform.position = terrainSpawnPoint;
+                tmpCurrentTerrainModule.SetActive(true);
+                terrainSpawnPoint += Vector3.right;
             }
 
             index++;
@@ -75,27 +75,27 @@ public class RandomGroundGenerator : MonoBehaviour
     }
     #endregion
 
-    public void UpdateGround()
+    public void UpdateTerrain()
     {
         // per ogni figlio di 'Ground'
         for (int i = 0; i < transform.childCount; i++)
         {
-            tmp = transform.GetChild(i).gameObject;
+            tmpCurrentTerrainModule = transform.GetChild(i).gameObject;
             // se il figlio è attivo
-            if (tmp.activeInHierarchy)
+            if (tmpCurrentTerrainModule.activeInHierarchy)
             {
                 // e se non è ancora arrivato all' 'endPoint'
-                if (tmp.transform.position.x > endPoint.x)
+                if (tmpCurrentTerrainModule.transform.position.x > endPoint.x)
                 {
                     // sposta il figlio
-                    tmp.transform.Translate(Vector3.left * speed * Time.deltaTime);
+                    tmpCurrentTerrainModule.transform.Translate(Vector3.left * speed * Time.deltaTime);
                 }
                 else
                 {
                     // altrimenti il figlio è arrivato all' 'endPoint'
                     // quindi salvo il figlio in una variabile temporanea 'tmpGroudToDeactivate'
                     // e attivo 'isTimeToWorkWithList' che servirà una volta finito il ciclo
-                    tmpGroundToDeactivate = tmp;
+                    tmpTerrainModuleToDeactivate = tmpCurrentTerrainModule;
                     isTimeToWorkWithList = true;
                 }
             }
@@ -105,10 +105,10 @@ public class RandomGroundGenerator : MonoBehaviour
         if (isTimeToWorkWithList)
         {
             // RESETTO l'oggetto che è arrivato all' 'endPoint'
-            ObjectPool.instance.DeactivateGround(tmpGroundToDeactivate);
+            ObjectPool.instance.DeactivateTerrainModule(tmpTerrainModuleToDeactivate);
 
             // INSTANZIO un nuovo oggetto casuale
-            ObjectPool.instance.ActivateNewGround(ref tmp);
+            ObjectPool.instance.ActivateNewRandomTerrainModule(ref tmpCurrentTerrainModule);
 
             // disattivo 'isTimeToWorkWithList'
             isTimeToWorkWithList = false;
