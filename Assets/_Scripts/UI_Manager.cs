@@ -43,6 +43,7 @@ public class UI_Manager : MonoBehaviour
         //GameManager.instance.StartGame();
         Debug.Log("GAME START");
         GameManager.instance.MainTransition();
+        UI_MainPanel.SetActive(false);
     }
     public void TogglePause()
     {
