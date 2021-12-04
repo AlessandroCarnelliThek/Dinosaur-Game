@@ -21,13 +21,15 @@ public class GameManager : MonoBehaviour
 
     #region POINT OF INTEREST
     [SerializeField] Transform terrainSpawnPoint;
+    //[SerializeField] Transform cactusSpawnPoint;
+    //[SerializeField] Transform enemySpawnPoint;
+    //[SerializeField] Transform cloudsSpawnPoint;
     [SerializeField] Transform endPoint;
     public Vector3 GetTerrainSpawnPoint() { return terrainSpawnPoint.position; }
     public Vector3 GetEndPoint() { return endPoint.position; }
     #endregion
 
     #region GAME BOOLEANS
-
     public bool isFirstPlay = true; // if hi score == 0;
     public bool terrainIsRunning = false;
     public bool dinoIsRunning = false;
@@ -48,14 +50,61 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region ENVIRONMENT
-    //private int score;
-    //private int hiScore;
+
     [SerializeField] DinoCanvasTouchMovement Dino;
     [SerializeField] RandomTerrainGenerator Terrain;
     #endregion
 
     public Action callback;
 
+    #region SCORE
+    private int score;
+    private float scoreTimer = 0;
+
+    IEnumerator UpdateScore()
+    {
+        scoreTimer = 0;
+        WaitForSeconds ws = new WaitForSeconds(0.1f);
+        if (PlayerPrefs.GetInt("hiScore", 0) == 0)
+        {
+            while (State != GameState.GAMEOVER)
+            {
+                yield return ws;
+                score += 1;
+                UI_Manager.instance.UpdateScorePanel(score);
+            }
+        }
+        else
+        {
+            while (score < PlayerPrefs.GetInt("hiScore", 0) && State != GameState.GAMEOVER)
+            {
+                yield return ws;
+                score += 1;
+                UI_Manager.instance.UpdateScorePanel(score);
+            }
+        }
+
+
+        UI_Manager.instance.StartScorePanelAnimation();
+
+        while (State != GameState.GAMEOVER)
+        {
+
+            score += 1;
+            UI_Manager.instance.UpdateHiScorePanel(score);
+            yield return ws;
+        }
+
+        if (score > PlayerPrefs.GetInt("hiScore", 0))
+        {
+            PlayerPrefs.SetInt("hiScore", score);
+        }
+
+    }
+
+
+    public int GetScore() { return score; }
+    #endregion
 
     private void Awake()
     {
@@ -64,13 +113,16 @@ public class GameManager : MonoBehaviour
 
         //-----------------------------
 
-        //score = 0;
-        //hiScore = 0;
+        score = 0;
+        Time.timeScale = 1;
+        PlayerPrefs.SetInt("hiScore", 100);
         //-----------------------------
     }
     private void Start()
     {
         UpdateGameState(GameState.MAIN);
+        UI_Manager.instance.UpdateScorePanel(score);
+        UI_Manager.instance.InitializeHiScorePanel();
     }
     public void UpdateGameState(GameState newState)
     {
@@ -98,12 +150,13 @@ public class GameManager : MonoBehaviour
         OnGameStateChanged?.Invoke(newState);
     }
 
-   
+
 
     public void Update()
     {
         Dino.UpdateDino();
         if (terrainIsRunning) { Terrain.UpdateTerrain(); }
+
     }
 
     public void HandleMain()
@@ -131,37 +184,18 @@ public class GameManager : MonoBehaviour
     }
     public void HandleGame()
     {
-
+        if (score == 0)
+        {
+            StartCoroutine(UpdateScore());
+        }
     }
     public void HandlePause()
     {
-//        Time.timeScale = (Time.timeScale != 0) ? 0 : 1;
     }
     public void HandleGameOver()
     {
 
     }
-
-
-
-
-
-
-
-
-
-    /*
-public bool GetGameIsRunning() { return gameIsRunning; }
-
-public GameState GetGameState()
-{
-    return gameState;
-}
-public void SetGameState(GameState newGameState)
-{
-    gameState = newGameState;
-}
-*/
 }
 
 public enum GameState
@@ -172,3 +206,4 @@ public enum GameState
     PAUSE,
     GAMEOVER
 }
+
