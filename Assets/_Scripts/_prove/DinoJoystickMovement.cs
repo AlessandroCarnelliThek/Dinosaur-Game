@@ -32,7 +32,7 @@ public class DinoJoystickMovement : MonoBehaviour
     {
         verticalMove = joystick.Vertical;
         Debug.Log(verticalMove);
-        if (controller.isDead)
+        if (controller.isDeath)
         {
             anim.Play("dino_death");
             Debug.Log("DEAD");

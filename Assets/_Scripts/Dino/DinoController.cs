@@ -16,19 +16,19 @@ public class DinoController : MonoBehaviour
     private bool wasgrounded = false;
 
     public bool isLanding = false;
+    public bool isDeath = false;
 
     private Rigidbody2D rb2D;
-
     [SerializeField] float jumpForce = 300;
-    public bool isDead = false;
 
+    // GIZMOS
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(groundCheck.position, groundedRradius);
     }
 
-    private void Awake()
-    {
+    // AWAKE
+    private void Awake() { 
         rb2D = GetComponent<Rigidbody2D>();
     }
 
@@ -47,11 +47,8 @@ public class DinoController : MonoBehaviour
             }
         }
     }
-
-
     public void Move(ref bool jump, ref bool crouch)
     {
-
         if (crouch)
         {
             defaultCollider2D.enabled = false;
@@ -61,21 +58,25 @@ public class DinoController : MonoBehaviour
         {
             crouchCollider2D.enabled = false;
             defaultCollider2D.enabled = true;
-
         }
         if (jump)
         {
             rb2D.AddForce(new Vector2(0f, jumpForce));
+            AudioManager.instance.Play("jump");
             jump = false;
         }
+        if (isDeath)
+        {
+            GameManager.instance.UpdateGameState(GameState.GAMEOVER);
+        }
+    }
 
-    }
-    public void SmashDown()
-    {
-        rb2D.gravityScale = 20;
-    }
-    public void NormalizeGravity()
-    {
-        rb2D.gravityScale = 3;
+    public void SmashDown() { rb2D.gravityScale = 20; }
+    public void NormalizeGravity() { rb2D.gravityScale = 3; }
+
+    public void SetIsDeath(bool var) 
+    { 
+        isDeath = var; 
     }
 }
+

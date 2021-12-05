@@ -29,101 +29,32 @@ public class GameManager : MonoBehaviour
     public Vector3 GetEndPoint() { return endPoint.position; }
     #endregion
 
-    #region GAME BOOLEANS
     public bool isFirstPlay = true; // if hi score == 0;
     public bool terrainIsRunning = false;
     public bool dinoIsRunning = false;
 
-    public void StartGround()
-    {
-        terrainIsRunning = true;
-    }
-    public void StartDino()
-    {
-        dinoIsRunning = true;
-    }
-    private void StartGame()
-    {
-        //UpdateGameState(!isFirstPlay ? GameState.GAME : GameState.TUTORIAL);
-        UpdateGameState(GameState.GAME);
-    }
-    #endregion
-
-    #region ENVIRONMENT
-
     [SerializeField] DinoCanvasTouchMovement Dino;
     [SerializeField] RandomTerrainGenerator Terrain;
-    #endregion
 
     public Action callback;
 
-    #region SCORE
     private int score;
-    private float scoreTimer = 0;
 
-    IEnumerator UpdateScore()
+    // AWAKE
+    private void Awake() { MakeSingleton(); }
+
+    // START
+    private void Start() { UpdateGameState(GameState.MAIN); }
+
+    // UPDATE
+    public void Update()
     {
-        scoreTimer = 0;
-        WaitForSeconds ws = new WaitForSeconds(0.1f);
-        if (PlayerPrefs.GetInt("hiScore", 0) == 0)
-        {
-            while (State != GameState.GAMEOVER)
-            {
-                yield return ws;
-                score += 1;
-                UI_Manager.instance.UpdateScorePanel(score);
-            }
-        }
-        else
-        {
-            while (score < PlayerPrefs.GetInt("hiScore", 0) && State != GameState.GAMEOVER)
-            {
-                yield return ws;
-                score += 1;
-                UI_Manager.instance.UpdateScorePanel(score);
-            }
-        }
-
-
-        UI_Manager.instance.StartScorePanelAnimation();
-
-        while (State != GameState.GAMEOVER)
-        {
-
-            score += 1;
-            UI_Manager.instance.UpdateHiScorePanel(score);
-            yield return ws;
-        }
-
-        if (score > PlayerPrefs.GetInt("hiScore", 0))
-        {
-            PlayerPrefs.SetInt("hiScore", score);
-        }
+        if (dinoIsRunning) { Dino.UpdateDino(); }
+        if (terrainIsRunning) { Terrain.UpdateTerrain(); }
 
     }
 
-
-    public int GetScore() { return score; }
-    #endregion
-
-    private void Awake()
-    {
-        // singleton
-        MakeSingleton();
-
-        //-----------------------------
-
-        score = 0;
-        Time.timeScale = 1;
-        PlayerPrefs.SetInt("hiScore", 100);
-        //-----------------------------
-    }
-    private void Start()
-    {
-        UpdateGameState(GameState.MAIN);
-        UI_Manager.instance.UpdateScorePanel(score);
-        UI_Manager.instance.InitializeHiScorePanel();
-    }
+    // UPDATE GAME STATE
     public void UpdateGameState(GameState newState)
     {
         State = newState;
@@ -149,25 +80,13 @@ public class GameManager : MonoBehaviour
 
         OnGameStateChanged?.Invoke(newState);
     }
-
-
-
-    public void Update()
-    {
-        Dino.UpdateDino();
-        if (terrainIsRunning) { Terrain.UpdateTerrain(); }
-
-    }
-
     public void HandleMain()
     {
-
-    }
-    public void MainTransition()
-    {
-        Debug.Log("GAME START");
-        Dino.StartDinoIntroAnimation();
-        Terrain.StartTerrainAnimation(() => StartGame());
+        PlayerPrefs.SetInt("hiScore", 100);
+        score = 0;
+        Time.timeScale = 1;
+        UI_Manager.instance.UpdateScorePanel(score);
+        UI_Manager.instance.InitializeHiScorePanel();
     }
     public void HandleTutorial()
     {
@@ -194,8 +113,83 @@ public class GameManager : MonoBehaviour
     }
     public void HandleGameOver()
     {
+        AudioManager.instance.Play("gameOver");
 
     }
+
+    // METHOD
+    public void StartGround()
+    {
+        terrainIsRunning = true;
+    }
+    public void StartDino()
+    {
+        dinoIsRunning = true;
+    }
+    private void StartGame()
+    {
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!! da implementare con tutorial
+        //UpdateGameState((PlayerPrefs.GetInt("hiScore", 0) > 0) ? GameState.GAME : GameState.TUTORIAL);
+        UpdateGameState(GameState.GAME);
+    }
+    public void MainTransition()
+    {
+        Debug.Log("GAME START");
+        Dino.StartDinoIntroAnimation(() => Terrain.StartTerrainAnimation(() => StartGame()));
+        ;
+    }
+
+    IEnumerator UpdateScore()
+    {
+        WaitForSeconds ws = new WaitForSeconds(0.1f);
+        
+        if (PlayerPrefs.GetInt("hiScore", 0) == 0)
+        {
+            while (State != GameState.GAMEOVER)
+            {
+                yield return ws;
+                score += 1;
+                UI_Manager.instance.UpdateScorePanel(score);
+                if (score % 100 == 0)
+                {
+                    AudioManager.instance.Play("score");
+                }
+            }
+        }
+        else
+        {
+            while (score < PlayerPrefs.GetInt("hiScore", 0) && State != GameState.GAMEOVER)
+            {
+                yield return ws;
+                score += 1;
+                UI_Manager.instance.UpdateScorePanel(score);
+                if (score % 100 == 0)
+                {
+                    AudioManager.instance.Play("score");
+                }
+            }
+        }
+        
+        UI_Manager.instance.StartScorePanelAnimation();
+        AudioManager.instance.Play("hiScore");
+
+        while (State != GameState.GAMEOVER)
+        {
+            score += 1;
+            UI_Manager.instance.UpdateHiScorePanel(score);
+            if (score % 100 == 0)
+            {
+                AudioManager.instance.Play("score");
+            }
+            yield return ws;
+        }
+
+        if (score > PlayerPrefs.GetInt("hiScore", 0))
+        {
+            PlayerPrefs.SetInt("hiScore", score);
+        }
+    }
+    public int GetScore() { return score; }
 }
 
 public enum GameState

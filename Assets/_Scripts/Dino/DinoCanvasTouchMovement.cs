@@ -2,147 +2,117 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
-
 public class DinoCanvasTouchMovement : MonoBehaviour
 {
-    [SerializeField] CrouchButton crouchButton;
     [SerializeField] JumpButton jumpButton;
+    [SerializeField] CrouchButton crouchButton;
 
-    private DinoController controller;
     private Animator anim;
+    private DinoController controller;
 
     private bool jump = false;
-    private bool isJumping = false;
     private bool crouch = false;
+    private bool isJumping = false;
     private bool isWaitingToCrouch = false;
 
-    /*private enum AnimationState
-    {
-        IDLE,
-        RUN,
-        JUMP,
-        CROUCH,
-        DEATH,
-    }*/
-    private AnimationState animationState;
-
-    // Start is called before the first frame update
+    // START
     void Start()
     {
-        controller = GetComponent<DinoController>();
         anim = GetComponent<Animator>();
+        controller = GetComponent<DinoController>();
 
         crouchButton.onCrouchButtonDown.AddListener(CrouchButtonPressedDown);
         crouchButton.onCrouchButtonUp.AddListener(CrouchButtonPressedUp);
         jumpButton.onJumpButtonDown.AddListener(JumpButtonPressedDown);
 
-        //animationState = AnimationState.IDLE;
+        // serve solo nel main
+        anim.Play("greenDino_idle");
     }
 
-    // Update is called once per frame
+    // FIXED UPDATE
+    private void FixedUpdate()
+    {
+        if (!controller.isDeath)
+        {
+            controller.GroundCheck();
+            controller.Move(ref jump, ref crouch);
+        }
+    }
+
+    // UPDATE DINO
     public void UpdateDino()
     {
-        if (GameManager.instance.dinoIsRunning)
+        if (!controller.isDeath)
         {
-            if (!controller.isDead)
+            if (controller.isLanding)
             {
-                if (controller.isLanding)
+                isJumping = false;
+                controller.isLanding = false;
+
+                if (isWaitingToCrouch)
                 {
-                    isJumping = false;
-                    controller.isLanding = false;
+                    crouch = true;
+                    controller.NormalizeGravity();
+                    anim.Play("greenDino_crouch");
 
-                    if (isWaitingToCrouch)
-                    {
-                        crouch = true;
-                        controller.NormalizeGravity();
-                        anim.Play("greenDino_crouch");
-
-
-                        isWaitingToCrouch = false;
-                    }
-                    else
-                    {
-                        anim.Play("greenDino_run");
-                    }
+                    isWaitingToCrouch = false;
                 }
+                else { anim.Play("greenDino_run"); }
             }
-            else
-            {
-                anim.Play("greenDino_death");
-            }
+        }
+        else { anim.Play("greenDino_death"); }
+    }
+
+    // ON ENABLE
+    //public void OnEnable() { anim?.Play("greenDino_idle"); }
+
+    // ON DISABLE
+    //public void OnDisable() { anim.Play("greenDino_death"); }
+
+    // JOYSTICK
+    public void CrouchButtonPressedDown()
+    {
+        if (!isJumping)
+        {
+            crouch = true;
+            anim.Play("greenDino_crouch");
         }
         else
         {
-            anim.Play("greenDino_idle");
-        }
-    }
-    
-    private void FixedUpdate()
-    {
-        controller.GroundCheck();
-        controller.Move(ref jump, ref crouch);
-    }
-    
-
-    public void CrouchButtonPressedDown()
-    {
-        if (!controller.isDead)
-        {
-            if (!isJumping)
-            {
-                crouch = true;
-                //animationState = AnimationState.CROUCH;
-                anim.Play("greenDino_crouch");
-
-            }
-            else
-            {
-                controller.SmashDown();
-                isWaitingToCrouch = true;
-            }
+            controller.SmashDown();
+            isWaitingToCrouch = true;
         }
     }
     public void CrouchButtonPressedUp()
     {
-        if (!controller.isDead)
+        if (!isJumping)
         {
-            if (!isJumping)
-            {
-                crouch = false;
-                //animationState = AnimationState.RUN;
-                anim.Play("greenDino_run");
-
-            }
-            else
-            {
-                controller.NormalizeGravity();
-                isWaitingToCrouch = false;
-            }
+            crouch = false;
+            anim.Play("greenDino_run");
+        }
+        else
+        {
+            controller.NormalizeGravity();
+            isWaitingToCrouch = false;
         }
     }
     public void JumpButtonPressedDown()
     {
-        if (!controller.isDead)
+        if (!isJumping)
         {
-            if (!isJumping)
-            {
-                crouch = false;
-                isJumping = true;
-                jump = true;
-                //animationState = AnimationState.JUMP;
-                anim.Play("greenDino_jump");
-
-            }
+            crouch = false;
+            isJumping = true;
+            jump = true;
+            anim.Play("greenDino_jump");
         }
     }
-    public void StartDinoIntroAnimation()
+
+    // INTRO ANIMATION
+    public void StartDinoIntroAnimation(Action callback)
     {
-        StartCoroutine(DinoIntroAnimation());
+        StartCoroutine(DinoIntroAnimation(callback));
     }
-    IEnumerator DinoIntroAnimation()
+    IEnumerator DinoIntroAnimation(Action callback)
     {
         float timer = 0;
         float duration = 0.4f;
@@ -150,10 +120,12 @@ public class DinoCanvasTouchMovement : MonoBehaviour
         Vector3 endPoint = new Vector3(-4.5f, 0, 0);
 
         JumpButtonPressedDown();
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.7f);
+
+        callback();
         GameManager.instance.StartDino();
 
-        while(timer < duration)
+        while (timer < duration)
         {
             timer += Time.deltaTime;
             transform.position = Vector3.Lerp(startPoint, endPoint, timer / duration);

@@ -1,25 +1,13 @@
 fileFormatVersion: 2
-guid: 3f7c05ec6e4aaf14eb370bc7cbc10922
+guid: d172037ef4152ec4183b6ee22dfabc7d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1179309794659711113
-    second: UI_BTN (3)_0
+      213: 162315595192456335
+    second: UI_BTN_STATIC_0
   - first:
-      213: 8090757696905884042
-    second: UI_BTN (3)_1
-  - first:
-      213: 251539431179669408
-    second: UI_BTN (3)_2
-  - first:
-      213: -5802702326376973813
-    second: UI_BTN (3)_3
-  - first:
-      213: -6452490691481750119
-    second: UI_BTN (3)_4
-  - first:
-      213: -2502920645817129626
-    second: UI_BTN (3)_5
+      213: 2488044308366826200
+    second: UI_BTN_STATIC_1
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -145,7 +133,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: UI_BTN (3)_0
+      name: UI_BTN_STATIC_0
       rect:
         serializedVersion: 2
         x: 0
@@ -159,14 +147,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7774b217dff32afe0800000000000000
-      internalID: -1179309794659711113
+      spriteID: f84d3f08c29a04200800000000000000
+      internalID: 162315595192456335
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: UI_BTN (3)_1
+      name: UI_BTN_STATIC_1
       rect:
         serializedVersion: 2
         x: 64
@@ -180,92 +168,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a8135d73245284070800000000000000
-      internalID: 8090757696905884042
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: UI_BTN (3)_2
-      rect:
-        serializedVersion: 2
-        x: 128
-        y: 0
-        width: 64
-        height: 64
-      alignment: 1
-      pivot: {x: 0, y: 1}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 0afc77aa7c5ad7300800000000000000
-      internalID: 251539431179669408
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: UI_BTN (3)_3
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 0
-        width: 64
-        height: 64
-      alignment: 1
-      pivot: {x: 0, y: 1}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b0ab7fa6af8a87fa0800000000000000
-      internalID: -5802702326376973813
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: UI_BTN (3)_4
-      rect:
-        serializedVersion: 2
-        x: 256
-        y: 0
-        width: 64
-        height: 64
-      alignment: 1
-      pivot: {x: 0, y: 1}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 99537b127e52476a0800000000000000
-      internalID: -6452490691481750119
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: UI_BTN (3)_5
-      rect:
-        serializedVersion: 2
-        x: 320
-        y: 0
-        width: 64
-        height: 64
-      alignment: 1
-      pivot: {x: 0, y: 1}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 66524150fe6d34dd0800000000000000
-      internalID: -2502920645817129626
+      spriteID: 8da13a1cd1f478220800000000000000
+      internalID: 2488044308366826200
       vertices: []
       indices: 
       edges: []

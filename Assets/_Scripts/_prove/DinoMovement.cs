@@ -27,7 +27,7 @@ public class DinoMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (controller.isDead)
+        if (controller.isDeath)
         {
             anim.Play("dino_death");
             Debug.Log("DEAD");

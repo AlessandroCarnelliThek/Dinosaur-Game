@@ -51,7 +51,7 @@ public class RandomTerrainGenerator : MonoBehaviour
     }
     IEnumerator FinishInitializeTerrain(Action callback)
     {
-        yield return new WaitForSeconds(0.5f);
+       // yield return new WaitForSeconds(0.8f);
 
         int index = 3;
         while (index < initialTerrainModulesNumber)

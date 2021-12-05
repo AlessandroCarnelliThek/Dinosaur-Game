@@ -30,7 +30,7 @@ public class DinoTouchMovement : MonoBehaviour
     void Update()
     {
 
-        if (controller.isDead)
+        if (controller.isDeath)
         {
             anim.Play("dino_death");
             Debug.Log("DEAD");
