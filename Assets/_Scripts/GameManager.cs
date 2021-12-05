@@ -40,6 +40,8 @@ public class GameManager : MonoBehaviour
 
     private int score;
 
+    public float speed = 5;
+
     // AWAKE
     private void Awake() { MakeSingleton(); }
 
@@ -148,10 +150,11 @@ public class GameManager : MonoBehaviour
             while (State != GameState.GAMEOVER)
             {
                 yield return ws;
-                score += 1;
+                score += 10;
                 UI_Manager.instance.UpdateScorePanel(score);
                 if (score % 100 == 0)
                 {
+                    speed += 0.2f;
                     AudioManager.instance.Play("score");
                 }
             }
@@ -161,10 +164,11 @@ public class GameManager : MonoBehaviour
             while (score < PlayerPrefs.GetInt("hiScore", 0) && State != GameState.GAMEOVER)
             {
                 yield return ws;
-                score += 1;
+                score += 10;
                 UI_Manager.instance.UpdateScorePanel(score);
                 if (score % 100 == 0)
                 {
+                    speed += 0.2f;
                     AudioManager.instance.Play("score");
                 }
             }
@@ -175,10 +179,11 @@ public class GameManager : MonoBehaviour
 
         while (State != GameState.GAMEOVER)
         {
-            score += 1;
+            score += 10;
             UI_Manager.instance.UpdateHiScorePanel(score);
             if (score % 100 == 0)
             {
+                speed += 0.2f;
                 AudioManager.instance.Play("score");
             }
             yield return ws;

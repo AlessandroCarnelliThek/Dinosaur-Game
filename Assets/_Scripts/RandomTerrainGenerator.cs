@@ -16,12 +16,17 @@ public class RandomTerrainGenerator : MonoBehaviour
     private int initialTerrainModulesNumber = 14;
 
     // dovra essere sostituita con una variabile speed globale che si incrementa con il passare del tempo
-    [SerializeField] float speed = 4;
+    [SerializeField] Transform TerrainAncorPoint;
+
 
     void Start()
     {
-        terrainSpawnPoint = GameManager.instance.GetTerrainSpawnPoint();
-        endPoint = GameManager.instance.GetEndPoint();
+
+        //terrainSpawnPoint = GameManager.instance.GetTerrainSpawnPoint();
+
+        terrainSpawnPoint = new Vector3(TerrainAncorPoint.position.x - 2, 0, 0);
+
+        endPoint = terrainSpawnPoint;
 
         InitializeTerrain();
     }
@@ -88,7 +93,7 @@ public class RandomTerrainGenerator : MonoBehaviour
                 if (tmpCurrentTerrainModule.transform.position.x > endPoint.x)
                 {
                     // sposta il figlio
-                    tmpCurrentTerrainModule.transform.Translate(Vector3.left * speed * Time.deltaTime);
+                    tmpCurrentTerrainModule.transform.Translate(Vector3.left * GameManager.instance.speed * Time.deltaTime);
                 }
                 else
                 {

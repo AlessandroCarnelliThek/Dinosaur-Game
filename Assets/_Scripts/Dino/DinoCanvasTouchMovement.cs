@@ -116,8 +116,8 @@ public class DinoCanvasTouchMovement : MonoBehaviour
     {
         float timer = 0;
         float duration = 0.4f;
-        Vector3 startPoint = new Vector3(-5, 0, 0);
-        Vector3 endPoint = new Vector3(-4.5f, 0, 0);
+        Vector3 startPoint = transform.position;
+        Vector3 endPoint = new Vector3(transform.position.x + 0.5f, 0, 0);
 
         JumpButtonPressedDown();
         yield return new WaitForSeconds(0.7f);

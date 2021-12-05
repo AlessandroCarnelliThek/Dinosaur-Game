@@ -21,6 +21,8 @@ public class DinoController : MonoBehaviour
     private Rigidbody2D rb2D;
     [SerializeField] float jumpForce = 300;
 
+    [SerializeField] Transform DinoAncorPoint;
+
     // GIZMOS
     private void OnDrawGizmos()
     {
@@ -30,6 +32,7 @@ public class DinoController : MonoBehaviour
     // AWAKE
     private void Awake() { 
         rb2D = GetComponent<Rigidbody2D>();
+        transform.position = new Vector3(DinoAncorPoint.position.x, transform.position.y, transform.position.z);
     }
 
 
