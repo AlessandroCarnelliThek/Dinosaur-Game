@@ -126,9 +126,9 @@ public class UI_Manager : MonoBehaviour
         float timer = 0;
         float duration = 0.4f;
         Vector3 startPoint = UI_HiScorePanel.transform.position;
-        Vector3 endPoint = new Vector3(4, UI_HiScorePanel.transform.position.y, 0);
-        Vector2 boxSizeAfter = new Vector2(hiScoreText.rectTransform.sizeDelta.x, 65);
-        Vector2 boxSizeBefore = new Vector2(120, 65);
+        Vector3 endPoint = UI_ScorePanel.transform.position;
+        Vector2 boxSizeAfter = new Vector2(hiScoreText.rectTransform.sizeDelta.x, hiScoreText.rectTransform.sizeDelta.y);
+        Vector2 boxSizeBefore = new Vector2(hiScoreText.rectTransform.sizeDelta.x * 1.3f, hiScoreText.rectTransform.sizeDelta.y);
         Vector2 panelSizeAfter = new Vector2(UI_HiScorePanel.GetComponent<RectTransform>().sizeDelta.x, 45);
         Vector2 panelSizeBefore = new Vector2(UI_HiScorePanel.GetComponent<RectTransform>().sizeDelta.x, 65);
         CanvasGroup scorePanelCanvasGroup = UI_ScorePanel.GetComponent<CanvasGroup>();
@@ -141,13 +141,13 @@ public class UI_Manager : MonoBehaviour
             scorePanelCanvasGroup.alpha = Mathf.Lerp(1, 0, timer / duration);
             UI_HiScorePanel.transform.position = Vector3.Lerp(startPoint, endPoint, timer / duration);
             hiScoreText.rectTransform.sizeDelta = Vector2.Lerp(boxSizeAfter, boxSizeBefore, timer / duration);
-            UI_HiScorePanel.GetComponent<RectTransform>().sizeDelta = Vector2.Lerp(panelSizeAfter, panelSizeBefore, timer / duration);
+            //UI_HiScorePanel.GetComponent<RectTransform>().sizeDelta = Vector2.Lerp(panelSizeAfter, panelSizeBefore, timer / duration);
             //transform.position = Vector3.Lerp(startPoint, endPoint, timer / duration);
             yield return null;
         }
         scorePanelCanvasGroup.alpha = 0;
-        hiScoreText.rectTransform.sizeDelta = boxSizeBefore;
-        UI_HiScorePanel.GetComponent<RectTransform>().sizeDelta = panelSizeBefore;
+        //hiScoreText.rectTransform.sizeDelta = boxSizeBefore;
+        //UI_HiScorePanel.GetComponent<RectTransform>().sizeDelta = panelSizeBefore;
 
         UI_HiScorePanel.transform.position = endPoint;
         EnableScorePanel(false);
